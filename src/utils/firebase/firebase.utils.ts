@@ -2,11 +2,20 @@
 import { initializeApp, FirebaseError } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 
 import type { User } from "firebase/auth";
 
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+
+type AdditionalUserData = {
+  displayName?: string;
+};
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -54,7 +63,10 @@ export const signInWithGoogle = async () => {
 
 export const db = getFirestore();
 
-export const createUserDocumentFromAuth = async (userAuth: User) => {
+export const createUserDocumentFromAuth = async (
+  userAuth: User,
+  additionalData: AdditionalUserData = {},
+) => {
   const userDocRef = doc(db, "user", userAuth.uid);
 
   const userSnapshot = await getDoc(userDocRef);
@@ -68,6 +80,7 @@ export const createUserDocumentFromAuth = async (userAuth: User) => {
         displayName,
         email,
         createdAt,
+        ...additionalData,
       });
     } catch (error) {
       if (error instanceof FirebaseError) {
@@ -80,5 +93,30 @@ export const createUserDocumentFromAuth = async (userAuth: User) => {
     }
 
     return userDocRef;
+  }
+};
+
+export const createAuthUserWithEmailAndPassword = async (
+  email: string,
+  password: string,
+) => {
+  if (!email || !password) return null;
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
+
+    return userCredential.user;
+  } catch (error) {
+    if (error instanceof FirebaseError) {
+      console.error(`Firebase error [${error.code}]: ${error.message}`);
+    } else {
+      console.error("Unexpected error:", error);
+    }
+
+    return null;
   }
 };
