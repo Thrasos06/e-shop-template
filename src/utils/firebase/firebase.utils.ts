@@ -7,6 +7,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 
 import type { User } from "firebase/auth";
@@ -110,6 +111,27 @@ export const createAuthUserWithEmailAndPassword = async (
     );
 
     return userCredential.user;
+  } catch (error) {
+    if (error instanceof FirebaseError) {
+      console.error(`Firebase error [${error.code}]: ${error.message}`);
+    } else {
+      console.error("Unexpected error:", error);
+    }
+
+    return null;
+  }
+};
+
+export const signInAuthUserWithEmailAndPassword = async (
+  email: string,
+  password: string,
+) => {
+  if (!email || !password) return null;
+
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+
+    return result.user;
   } catch (error) {
     if (error instanceof FirebaseError) {
       console.error(`Firebase error [${error.code}]: ${error.message}`);

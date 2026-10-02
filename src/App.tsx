@@ -6,7 +6,7 @@ import Navigation from "./components/navigation-bar/Navigation-bar";
 
 import Home from "./routes/home/Home.component";
 import Shop from "./routes/shop/Shop-component";
-import SignIn from "./routes/sign-in/Sign-in.component";
+import AuthenticationPage from "./routes/authentication/Authentication.component";
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
       <Route path="/" element={<Navigation />}>
         <Route index element={<Home />} />
         <Route path="shop" element={<Shop />} />
-        <Route path="sign-in" element={<SignIn />} />
+        <Route path="sign-in" element={<AuthenticationPage />} />
       </Route>
     </Routes>
   );
