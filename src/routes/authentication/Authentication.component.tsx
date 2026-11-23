@@ -1,6 +1,7 @@
 import {
   signInWithGoogle,
   createUserDocumentFromAuth,
+  isFirebaseConfigured,
 } from "../../utils/firebase/firebase.utils";
 
 import SignUpForm from "../../components/sign-up-form/Sign-up-form.component";
@@ -17,7 +18,12 @@ const handleGoogleSignIn = async () => {
 const AuthenticationPage = () => {
   return (
     <main className="min-h-[calc(100vh-80px)] bg-white">
-      <div className="mx-auto grid w-full max-w-5xl gap-16 px-6 py-16 md:grid-cols-2 md:py-24">
+      {!isFirebaseConfigured && (
+        <p role="status" className="mx-auto max-w-5xl px-6 pt-8 text-amber-800">
+          Account access is temporarily unavailable. You can still browse the store.
+        </p>
+      )}
+      <fieldset disabled={!isFirebaseConfigured} className="mx-auto grid w-full min-w-0 max-w-5xl gap-16 border-0 px-6 py-16 disabled:opacity-60 md:grid-cols-2 md:py-24">
         {/* Sign In */}
         <section className="w-full">
           <div className="mb-8">
@@ -86,7 +92,7 @@ const AuthenticationPage = () => {
         <section className="border-t border-slate-200 pt-10 md:border-l md:border-t-0 md:pl-16 md:pt-0">
           <SignUpForm />
         </section>
-      </div>
+      </fieldset>
     </main>
   );
 };

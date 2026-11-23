@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, FirebaseError } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 import {
   getAuth,
@@ -33,10 +33,17 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const analytics = getAnalytics(app);
+export const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey && firebaseConfig.authDomain &&
+  firebaseConfig.projectId && firebaseConfig.appId,
+);
+const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
+export const analytics = app && firebaseConfig.measurementId
+  ? isSupported().then((supported) => supported ? getAnalytics(app) : null)
+      .catch(() => null)
+  : Promise.resolve(null);
 
-export const auth = getAuth(app);
+export const auth = app ? getAuth(app) : null;
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -45,6 +52,7 @@ googleProvider.setCustomParameters({
 });
 
 export const signInWithGoogle = async () => {
+  if (!auth) return null;
   try {
     const result = await signInWithPopup(auth, googleProvider);
 
@@ -62,12 +70,13 @@ export const signInWithGoogle = async () => {
   }
 };
 
-export const db = getFirestore();
+export const db = app ? getFirestore(app) : null;
 
 export const createUserDocumentFromAuth = async (
   userAuth: User,
   additionalData: AdditionalUserData = {},
 ) => {
+  if (!db) return null;
   const userDocRef = doc(db, "user", userAuth.uid);
 
   const userSnapshot = await getDoc(userDocRef);
@@ -101,7 +110,7 @@ export const createAuthUserWithEmailAndPassword = async (
   email: string,
   password: string,
 ) => {
-  if (!email || !password) return null;
+  if (!auth || !email || !password) return null;
 
   try {
     const userCredential = await createUserWithEmailAndPassword(
@@ -126,7 +135,7 @@ export const signInAuthUserWithEmailAndPassword = async (
   email: string,
   password: string,
 ) => {
-  if (!email || !password) return null;
+  if (!auth || !email || !password) return null;
 
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
